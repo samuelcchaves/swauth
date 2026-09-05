@@ -83,6 +83,23 @@ CREATE TABLE mfa_backup_codes (
         ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
+CREATE TABLE sessions (
+    id                  BIGINT AUTO_INCREMENT PRIMARY KEY,
+    session_token_hash  CHAR(64) NOT NULL UNIQUE,   -- SHA-256 hex do token bruto
+    user_id             INT NOT NULL,
+    user_agent          VARCHAR(255) NULL,
+    ip_created          VARCHAR(45) NOT NULL,
+    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_seen_at        TIMESTAMP NULL,
+    expires_at          TIMESTAMP NOT NULL,
+    revoked_at          TIMESTAMP NULL,
+ 
+    CONSTRAINT FK_SESSIONS_USER
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
 
 CREATE TABLE password_reset_tokens (
     id  BIGINT AUTO_INCREMENT PRIMARY KEY,
