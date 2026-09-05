@@ -1,15 +1,12 @@
 <?php
 
-namespace src\Domain\Entities;
+namespace SwAuth\Domain\Entities;
 
 use SwAuth\Domain\ValueObjects\Email;
 use SwAuth\Domain\ValueObjects\HashedPassword;
 
 
 use DateTimeImmutable;
-
-
-
 
 Class User {
     private int $id;

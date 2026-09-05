@@ -1,8 +1,5 @@
 <?php
-namespace Src\Domain\Entities;
-
-
-
+namespace SwAuth\Domain\Entities;
 
 class Role {
     private int $id;
