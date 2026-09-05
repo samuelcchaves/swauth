@@ -11,8 +11,12 @@ Módulo de autenticação e autorização, construído como pacote Composer inde
 - Lockout de conta por tentativas falhadas, com auditoria completa
 - Reset de password e verificação de e-mail, com controlo de estado por token
 
+## Requisitos
+- PHP >= 8.1
+- MySQL/MariaDB
+
 ## Instalação
 
-\`\`\`bash
+```bash
 composer require seeware/sw-auth
-\`\`\`
+```
