@@ -43,7 +43,21 @@ Class User {
         int $failed_login_count,
         ?DateTimeImmutable $lockedUntil = null,
         ?DateTimeImmutable $lastLoginAt = null
-    ) {}
+    ) {
+        $this->id = $id;
+        $this->role = $role;
+        $this->isActive = $isActive;
+        $this->username = $username;
+        $this->email = $email;
+        $this->firstName = $firstName;
+        $this->lastName = $lastName;
+        $this->emailVerified = $emailVerified;
+        $this->password = $password;
+        $this->mustChangePassword = $mustChangePassword;
+        $this->failed_login_count = $failed_login_count;
+        $this->lockedUntil = $lockedUntil;
+        $this->lastLoginAt = $lastLoginAt;
+    }
 
     public function getId(): int
     {
@@ -132,7 +146,7 @@ Class User {
         return new DateTimeImmutable() < $this->lockedUntil;
     }
 
-    public function verifyEmail(): void 
+        public function verifyEmail(): void 
     {
         $this->emailVerified = true;
     }

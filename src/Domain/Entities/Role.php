@@ -15,7 +15,13 @@ class Role {
         string $roleDescription,
         int $level,
         bool $requires_mfa
-    ) {}
+    ) {
+        $this->id = $id;
+        $this->roleName = $roleName;
+        $this->roleDescription = $roleDescription;
+        $this->level = $level;
+        $this->requires_mfa = $requires_mfa;
+    }
 
     public function getId(): int
     {
