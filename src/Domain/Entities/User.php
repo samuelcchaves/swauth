@@ -20,6 +20,7 @@ Class User {
     private HashedPassword $password;
     private bool $mustChangePassword;
     private int $failed_login_count;
+    private ?DateTimeImmutable $passwordChangedAt;
 
     private ?DateTimeImmutable $lockedUntil;
     private ?DateTimeImmutable $lastLoginAt;
@@ -41,6 +42,7 @@ Class User {
         HashedPassword $password,
         bool $mustChangePassword,
         int $failed_login_count,
+        ?DateTimeImmutable $passwordChangedAt,
         ?DateTimeImmutable $lockedUntil = null,
         ?DateTimeImmutable $lastLoginAt = null
     ) {
@@ -55,6 +57,7 @@ Class User {
         $this->password = $password;
         $this->mustChangePassword = $mustChangePassword;
         $this->failed_login_count = $failed_login_count;
+        $this->passwordChangedAt = $passwordChangedAt;
         $this->lockedUntil = $lockedUntil;
         $this->lastLoginAt = $lastLoginAt;
     }
@@ -107,6 +110,11 @@ Class User {
     public function mustChangePassword(): bool
     {
         return $this->mustChangePassword;
+    }
+
+    public function getPasswordChangedAt(): ?DateTimeImmutable 
+    {
+        return $this->passwordChangedAt;
     }
 
     public function getFailedLoginCount(): int
