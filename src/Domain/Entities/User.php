@@ -19,7 +19,7 @@ Class User {
     private bool $emailVerified;
     private HashedPassword $password;
     private bool $mustChangePassword;
-    private int $failed_login_count;
+    private int $failedLoginCount;
     private ?DateTimeImmutable $passwordChangedAt;
 
     private ?DateTimeImmutable $lockedUntil;
@@ -41,7 +41,7 @@ Class User {
         bool $emailVerified,
         HashedPassword $password,
         bool $mustChangePassword,
-        int $failed_login_count,
+        int $failedLoginCount,
         ?DateTimeImmutable $passwordChangedAt,
         ?DateTimeImmutable $lockedUntil = null,
         ?DateTimeImmutable $lastLoginAt = null
@@ -56,7 +56,7 @@ Class User {
         $this->emailVerified = $emailVerified;
         $this->password = $password;
         $this->mustChangePassword = $mustChangePassword;
-        $this->failed_login_count = $failed_login_count;
+        $this->failedLoginCount = $failedLoginCount;
         $this->passwordChangedAt = $passwordChangedAt;
         $this->lockedUntil = $lockedUntil;
         $this->lastLoginAt = $lastLoginAt;
@@ -119,7 +119,7 @@ Class User {
 
     public function getFailedLoginCount(): int
     {
-        return $this->failed_login_count;
+        return $this->failedLoginCount;
     }
 
     public function getLockedUntil(): ?DateTimeImmutable
@@ -133,15 +133,15 @@ Class User {
 
     public function recordFailedLogin(): void 
     {
-        $this->failed_login_count++;
-        if ($this->failed_login_count >= self::MAX_FAILED_ATTEMPTS) {
+        $this->failedLoginCount++;
+        if ($this->failedLoginCount >= self::MAX_FAILED_ATTEMPTS) {
             $this->lockedUntil = new DateTimeImmutable("+" . self::LOCKOUT_DURATION_MINUTES . " minutes");
         }
     }
 
     public function recordSuccessfulLogin(): void
     {
-        $this->failed_login_count = 0;
+        $this->failedLoginCount = 0;
         $this->lockedUntil = null;
         $this->lastLoginAt = new DateTimeImmutable();
     }
