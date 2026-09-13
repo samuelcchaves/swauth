@@ -7,20 +7,20 @@ class Role {
     private string $roleDescription;
     private int $level;
 
-    private bool $requires_mfa;
+    private bool $requiresMfa;
 
     public function __construct(
         int $id,
         string $roleName,
         string $roleDescription,
         int $level,
-        bool $requires_mfa
+        bool $requiresMfa
     ) {
         $this->id = $id;
         $this->roleName = $roleName;
         $this->roleDescription = $roleDescription;
         $this->level = $level;
-        $this->requires_mfa = $requires_mfa;
+        $this->requiresMfa = $requiresMfa;
     }
 
     public function getId(): int
@@ -43,9 +43,9 @@ class Role {
         return $this->level;
     }
 
-    public function getRequiresMfa(): bool
+    public function getrequiresMfa(): bool
     {
-        return $this->requires_mfa;
+        return $this->requiresMfa;
     }
 
    
