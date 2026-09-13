@@ -2,8 +2,6 @@
 
 namespace SwAuth\Infrastructure\Persistence;
 
-use ErrorException;
-use PDOException;
 use PDO;
 use SwAuth\Domain\Repositories\RoleRepositoryInterface;
 use SwAuth\Domain\Entities\Role;
@@ -45,7 +43,7 @@ class PdoRoleRepository implements RoleRepositoryInterface {
         $stmt = $this->pdo->prepare("SELECT * FROM roles");
         $stmt->execute();
         $rows = $stmt->fetchAll();
-        
+
         $roles = [];
         foreach($rows as $row) {
             $roles[] = $this->mapRowToRole($row);
