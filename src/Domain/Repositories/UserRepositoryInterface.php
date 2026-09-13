@@ -18,7 +18,8 @@ interface UserRepositoryInterface
 
     public function existsByUsername(string $username): bool;
 
-    public function save(User $user): void;
+    public function insert(User $user): User;
+    public function update(User $user): void;
 
     
 
