@@ -1,15 +1,18 @@
+
+DROP DATABASE sw_auth;
+CREATE DATABASE sw_auth;
 use sw_auth;
 
 CREATE TABLE roles (
     id               INT AUTO_INCREMENT PRIMARY KEY,
     role_name        VARCHAR(100) NOT NULL UNIQUE,
     role_description VARCHAR(150) NULL,
-    level            INT NOT NULL UNIQUE,      -- ex: admin=100, manager=75, user=50, viewer=25
+    role_level            INT NOT NULL UNIQUE,      -- ex: admin=100, manager=75, user=50, viewer=25
     requires_mfa     BOOLEAN NOT NULL DEFAULT FALSE,
     created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB AUTO_INCREMENT = 10;
  
-INSERT INTO roles (role_name, role_description, level, requires_mfa) VALUES
+INSERT INTO roles (role_name, role_description, role_level, requires_mfa) VALUES
     ('admin',   'Acesso total ao sistema',                    100, TRUE),
     ('manager', 'Gestão operacional, sem administração',       75, FALSE),
     ('user',    'Utilizador padrão',                           50, FALSE),
@@ -29,7 +32,7 @@ CREATE TABLE users (
     must_change_password BOOLEAN NOT NULL DEFAULT FALSE,
     failed_login_count INT NOT NULL DEFAULT 0,
     locked_until TIMESTAMP NULL,
-    last_login TIMESTAMP NULL,
+    last_login_at TIMESTAMP NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
  
