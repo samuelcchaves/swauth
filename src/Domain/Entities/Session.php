@@ -11,7 +11,7 @@ class Session {
     private string $userAgent;
     private string $ipCreated;
     private DateTimeImmutable $expiresAt;
-    private DateTimeImmutable $revokedAt;
+    private ?DateTimeImmutable $revokedAt;
 
     public function __construct(
         int $id,
@@ -61,7 +61,7 @@ class Session {
         return $this->expiresAt;
     }
 
-    public function getRevokedAt(): DateTimeImmutable 
+    public function getRevokedAt(): ?DateTimeImmutable 
     {
         return $this->revokedAt;
     }
