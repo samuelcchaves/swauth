@@ -164,4 +164,13 @@ Class User {
         $this->mustChangePassword = true;
     }
 
+    public static function register(Role $role, string $username, Email $email, HashedPassword $hashedPassword): self {
+        return new self(
+            id: 0, role: $role, isActive: true, username: $username, email: $email, firstName: null, lastName: null, emailVerified: false,
+            password: $hashedPassword, mustChangePassword: false, failedLoginCount: 0, passwordChangedAt:null, lockedUntil: null, lastLoginAt: null
+        );
+    }
+
+
+
 }
