@@ -78,7 +78,7 @@ class Session {
 
     public function isValid(): bool
     {
-        return $this->isExpired() && !$this->isRevoked();
+        return !$this->isExpired() && $this->isRevoked();
     }
 
     public function revoke(): void 
@@ -90,11 +90,5 @@ class Session {
     {
         return $this->tokenHash->matches($rawToken);
     }
-    
-
-
-
-
-
-   
+      
 }
