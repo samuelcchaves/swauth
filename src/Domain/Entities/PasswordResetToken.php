@@ -34,7 +34,7 @@ class PasswordResetToken
     }
 
     public function getResolvedAt(): ?DateTimeImmutable {
-        return $this->getResolvedAt();
+        return $this->resolvedAt;
     }
     public function isPending(): bool
     {
