@@ -24,11 +24,17 @@ class PdoEmailVerificationRepository implements EmailVerificationRepositoryInter
 
      public function findPendingByTokenHash(TokenHash $tokenHash): ?EmailVerificationToken
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM password_reset_tokens WHERE token_hash = ? and t_status = 'pending'");
+        $stmt = $this->pdo->prepare("SELECT * FROM email_verification_tokens WHERE token_hash = ? and t_status = 'pending'");
         $stmt->execute([(string) $tokenHash]);
         $row = $stmt->fetch();
         if($row === false) return null;
         return $this->mapRowToEmailVerification($row);
+    }
+
+    public function supersedePendingForUser(int $userId): void
+    {
+        $stmt = $this->pdo->prepare("UPDATE email_verification_tokens SET t_status = 'superseded', resolved_at = NOW() WHERE user_id = ? and t_status = 'pending'");
+        $stmt->execute([$userId]);
     }
 
      public function insert(EmailVerificationToken $emailVerificationToken): EmailVerificationToken
