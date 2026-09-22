@@ -3,7 +3,7 @@
 
 namespace SwAuth\Domain\Repositories;
 
-use Swauth\Domain\Entities\EmailVerificationToken;
+use SwAuth\Domain\Entities\EmailVerificationToken;
 use SwAuth\Domain\ValueObjects\TokenHash;
 
 

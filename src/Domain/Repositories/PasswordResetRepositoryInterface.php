@@ -4,7 +4,7 @@
 namespace SwAuth\Domain\Repositories;
 
 use SwAuth\Domain\Entities\PasswordResetToken;
-use Swauth\Domain\ValueObjects\TokenHash;
+use SwAuth\Domain\ValueObjects\TokenHash;
 
 interface PasswordResetRepositoryInterface
 {
