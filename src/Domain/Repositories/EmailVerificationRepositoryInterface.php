@@ -9,6 +9,6 @@ use SwAuth\Domain\ValueObjects\TokenHash;
 
 interface EmailVerificationRepositoryInterface
 {
-    public function findBendingByTokenHash(TokenHash $tokenHash): ?EmailVerificationToken;
+    public function findPendingByTokenHash(TokenHash $tokenHash): ?EmailVerificationToken;
     public function save(EmailVerificationToken $token): void;
 }
