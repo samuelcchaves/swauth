@@ -25,6 +25,17 @@ class PasswordResetToken
         return $this->expiresAt < new DateTimeImmutable();
     }
 
+    public function getExpiresAt(): DateTimeImmutable {
+        return $this->expiresAt;
+    }
+
+    public function getStatus(): String {
+        return $this->status;
+    }
+
+    public function getResolvedAt(): ?DateTimeImmutable {
+        return $this->getResolvedAt();
+    }
     public function isPending(): bool
     {
         return $this->status === 'pending';
