@@ -9,6 +9,8 @@ use SwAuth\Domain\ValueObjects\TokenHash;
 
 interface PasswordResetRepositoryInterface
 {
+
+    public function findById(int $id): ?PasswordResetToken;
     public function findPendingByTokenHash(TokenHash $tokenHash): ?PasswordResetToken;
     public function supersedePendingForUser(int $userId): void;
     
