@@ -12,8 +12,8 @@ interface PasswordResetRepositoryInterface
     public function findPendingByTokenHash(TokenHash $tokenHash): ?PasswordResetToken;
     public function supersedePendingForUser(int $userId): void;
     
-    public function insert(TokenHash $tokenHash): TokenHash;
-    public function update(TokenHash $tokenHash): void;
+    public function insert(PasswordResetToken $passwordResetToken): PasswordResetToken;
+    public function update(PasswordResetToken $passwordResetToken): void;
 
 }
 
