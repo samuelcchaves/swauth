@@ -39,8 +39,8 @@ class PdoLoginAuditRepositoryTest extends TestCase
         $userEmail2 = new Email('marcosaurelio@email.com');
         $userPassword2 = HashedPassword::fromPlainText('654321');
     
-        $user1 = User::register($userRole, 'samuelcchaves', $userEmail1, $userPassword1);
-        $user2 = User::register($userRole, 'marcosaurelio', $userEmail2, $userPassword2);
+        $user1 = User::register($userRole, 'samuelcchaves', $userEmail1, $userPassword1, 'Samuel', 'Chaves');
+        $user2 = User::register($userRole, 'marcosaurelio', $userEmail2, $userPassword2, 'Marcos', 'Aurelio');
 
         $userObj1 = $userRepo->insert($user1);
         $userObj2 = $userRepo->insert($user2);
