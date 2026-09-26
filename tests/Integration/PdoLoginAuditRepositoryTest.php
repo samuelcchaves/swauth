@@ -9,36 +9,62 @@ use PDO;
 use PHPUnit\Framework\TestCase;
 use SwAuth\Infrastructure\Persistence\Database;
 use SwAuth\Infrastructure\Persistence\PdoLoginAuditRepository;
+use SwAuth\Infrastructure\Persistence\PdoRoleRepository;
+use SwAuth\Infrastructure\Persistence\PdoUserRepository;
+use SwAuth\Domain\Entities\User;
+use SwAuth\Domain\ValueObjects\Email;
+use SwAuth\Domain\ValueObjects\HashedPassword;
+
 
 class PdoLoginAuditRepositoryTest extends TestCase
 {
     private PDO $pdo;
     private PdoLoginAuditRepository $repository;
+    private int $userId1;
+    private int $userId2;
 
 
-    // Setting up the elements needed for the test to run
     protected function setUp(): void
     {
-        // get $pdo
         $this->pdo = Database::getInstance();
 
-        // instantiate the repo and inject $pdo
-        $this->repository = new PdoLoginAuditRepository($this->pdo);
+        $roleRepo = new PdoRoleRepository($this->pdo);
+        $userRepo = new PdoUserRepository($this->pdo, $roleRepo);
+        /* $userRole = $roleRepo->findById(10); */
 
-        // empty the table to stat tests in a clean way
+        $userRole = $roleRepo->findById(10);
+        $userEmail1 = new Email('samuelcchave1@email.com');
+        $userPassword1 = HashedPassword::fromPlainText('123456');
+        
+        $userEmail2 = new Email('marcosaurelio@email.com');
+        $userPassword2 = HashedPassword::fromPlainText('654321');
+    
+        $user1 = User::register($userRole, 'samuelcchaves', $userEmail1, $userPassword1);
+        $user2 = User::register($userRole, 'marcosaurelio', $userEmail2, $userPassword2);
+
+        $userObj1 = $userRepo->insert($user1);
+        $userObj2 = $userRepo->insert($user2);
+
+        $this->userId1 = $userObj1->getId();
+        $this->userId2 = $userObj2->getId();
+
+        
+        $this->repository = new PdoLoginAuditRepository($this->pdo);
+        
+
+
         $this->pdo->exec('DELETE FROM login_audit');
     }
 
-    // Runs after the test ended
     protected function tearDown(): void
     {   
-        // empty table 
+        $this->pdo->exec('DELETE FROM users');
         $this->pdo->exec('DELETE FROM login_audit');
+        
     }
 
     public function testRecordInsertsFailedAttempt(): void
     {
-        // Act
         $this->repository->record(
             null,
             'naoexiste@teste.com',
@@ -47,7 +73,6 @@ class PdoLoginAuditRepositoryTest extends TestCase
             'invalid_credentials'
         );
 
-        // Assert — sem findById(), confirmamos via count
         $count = $this->repository->countRecentFailuresByIp(
             '127.0.0.1',
             new DateTimeImmutable('-1 minute')
@@ -58,18 +83,16 @@ class PdoLoginAuditRepositoryTest extends TestCase
 
     public function testRecordInsertsSuccessfulAttemptAndDoesNotCountAsFailure(): void
     {
-        // Act
         $this->repository->record(
-            1,
+            $this->userId1,
             'user@teste.com',
             '10.0.0.5',
             true,
             null
         );
 
-        // Assert — sucesso não deve entrar na contagem de falhas
         $count = $this->repository->countRecentFailuresByUser(
-            1,
+            $this->userId1,
             new DateTimeImmutable('-1 minute')
         );
 
@@ -78,16 +101,13 @@ class PdoLoginAuditRepositoryTest extends TestCase
 
     public function testCountRecentFailuresByUserCountsOnlyThatUser(): void
     {
-        // Arrange
-        $this->repository->record(1, 'a@teste.com', '10.0.0.1', false, 'invalid_credentials');
-        $this->repository->record(1, 'a@teste.com', '10.0.0.1', false, 'invalid_credentials');
-        $this->repository->record(2, 'b@teste.com', '10.0.0.2', false, 'invalid_credentials');
+        $this->repository->record($this->userId1, 'a@teste.com', '10.0.0.1', false, 'invalid_credentials');
+        $this->repository->record($this->userId1, 'a@teste.com', '10.0.0.1', false, 'invalid_credentials');
+        $this->repository->record($this->userId2, 'b@teste.com', '10.0.0.2', false, 'invalid_credentials');
 
-        // Act
-        $countUser1 = $this->repository->countRecentFailuresByUser(1, new DateTimeImmutable('-1 minute'));
-        $countUser2 = $this->repository->countRecentFailuresByUser(2, new DateTimeImmutable('-1 minute'));
+        $countUser1 = $this->repository->countRecentFailuresByUser($this->userId1, new DateTimeImmutable('-1 minute'));
+        $countUser2 = $this->repository->countRecentFailuresByUser($this->userId2, new DateTimeImmutable('-1 minute'));
 
-        // Assert
         $this->assertSame(2, $countUser1);
         $this->assertSame(1, $countUser2);
     }
