@@ -22,16 +22,18 @@ class PdoLoginAuditRepository implements LoginAuditRepositoryInterface {
     }
 
     public function countRecentFailuresByUser(int $userId, DateTimeImmutable $since): int {
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM login_audit WHERE user_id = ? AND created_at >= ?");
-        $stmt->execute([$userId, (string) $since]);
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM login_audit WHERE user_id = ? AND success = 0 AND created_at >= ?");
+
+        $stmt->execute([$userId, $since->format('Y-m-d H:i:s')]);
         
         return (int) $stmt->fetchColumn();
     }
     
     public function countRecentFailuresByIp(string $ip, DateTimeImmutable $since): int {
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM login_audit WHERE ip = ? AND created_at >= ?");
-        $stmt->execute([$ip, (string) $since]);
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM login_audit WHERE ip = ? AND success = 0 AND created_at >= ?");
         
+        $stmt->execute([$ip, (string) $since->format('Y-m-d H:i:s')]);
+    
         return (int) $stmt->fetchColumn();
     }  
 
