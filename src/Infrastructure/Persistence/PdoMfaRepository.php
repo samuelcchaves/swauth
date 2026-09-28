@@ -74,6 +74,18 @@ class PdoMfaRepository implements MfaMethodRepositoryInterface {
         $stmt->execute([$mfaMethodId]);
     }
 
+    public function activate(int $mfaMethodId): void {
+        $stmt = $this->pdo->prepare("UPDATE mfa_methods SET is_active = 1 WHERE id = ?");
+        $stmt->execute([$mfaMethodId]);
+    }
+
+    #[Override]
+    public function deactivateBackupCodes(int $userId): void
+    {
+        $stmt = $this->pdo->prepare("UPDATE mfa_backup_codes SET used_at = NOW() WHERE user_id = ? AND used_at IS null");
+        $stmt->execute([$userId]);
+    }
+
     #[Override]
     public function saveBackupCode(int $userId, array $codeHashes): void
     {

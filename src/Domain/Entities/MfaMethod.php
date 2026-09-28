@@ -1,24 +1,29 @@
 <?php
 
 namespace SwAuth\Domain\Entities;
+
+use DateTime;
 use DateTimeImmutable;
+use Respect\Validation\Rules\Date;
 
 class MfaMethod
 {
-    public function __construct(
-        private int $id,
-        private int $userId,
-        private string $type,             // 'totp' — único valor válido por agora
-        private string $secretEncrypted,  // já encriptado; esta classe nunca vê o valor em claro
-        private bool $isActive = true,
-        private ?DateTimeImmutable $lastUsedAt = null
-    )
+
+    private int $id;
+    private int $userId;
+
+    private string $type;
+    private string $secretEncrypted;
+    private bool $isActive;
+
+    private ?DateTimeImmutable $lastUsedAt;
+    public function __construct(int $id, int $userId, string $type, string $secretEncrypted, bool $isActive, ?DateTimeImmutable $lastUsedAt = null)
     {
         $this->id = $id;
         $this->userId = $userId;
         $this->type = $type;
         $this->secretEncrypted = $secretEncrypted;
-        $this->isActive = true;
+        $this->isActive = $isActive;
         $this->lastUsedAt = $lastUsedAt;
     }
 
@@ -42,7 +47,7 @@ class MfaMethod
         return $this->isActive;
     }
 
-    public function getLastUsedAt(): DateTimeImmutable 
+    public function getLastUsedAt(): ?DateTimeImmutable 
     {
         return $this->lastUsedAt;
     }

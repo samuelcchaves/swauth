@@ -9,7 +9,7 @@ use SwAuth\Domain\ValueObjects\BackupCode;
 interface MfaMethodRepositoryInterface 
 {
 
-    public function findById(int $userId): ?MfaMethod;
+    public function findById(int $mfaMethodId): ?MfaMethod;
 
     public function findActiveByUserId(int $userId): ?MfaMethod;
 
@@ -18,6 +18,10 @@ interface MfaMethodRepositoryInterface
     public function update(MfaMethod $mfaMethod): void;
 
     public function deactivate(int $mfaMethodId): void;
+
+    public function deactivateBackupCodes(int $userId): void;
+
+    public function activate(int $mfaMethodId): void;
     /**
      *  @param BackupCode[] $codeHashes
     */
