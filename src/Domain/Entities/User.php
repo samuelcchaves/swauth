@@ -8,7 +8,7 @@ use SwAuth\Domain\ValueObjects\HashedPassword;
 
 use DateTimeImmutable;
 
-Class User {
+class User {
     private int $id;
     private Role $role;
     private bool $isActive;
@@ -25,8 +25,7 @@ Class User {
     private ?DateTimeImmutable $lockedUntil;
     private ?DateTimeImmutable $lastLoginAt;
 
-    private const MAX_FAILED_ATTEMPTS = 5;
-    private const LOCKOUT_DURATION_MINUTES = 15;
+
 
 
     // Constructor method
@@ -134,27 +133,28 @@ Class User {
     public function recordFailedLogin(): void 
     {
         $this->failedLoginCount++;
-        if ($this->failedLoginCount >= self::MAX_FAILED_ATTEMPTS) {
-            $this->lockedUntil = new DateTimeImmutable("+" . self::LOCKOUT_DURATION_MINUTES . " minutes");
-        }
     }
 
     public function recordSuccessfulLogin(): void
     {
         $this->failedLoginCount = 0;
         $this->lockedUntil = null;
-        $this->lastLoginAt = new DateTimeImmutable();
+        $this->lastLoginAt = new DateTimeImmutable('now');
     }
 
-    public function isLocked(): bool
+    public function lock(DateTimeImmutable $until): void
     {
-        if ($this->lockedUntil === null) {
-            return false;
-        }
-        return new DateTimeImmutable() < $this->lockedUntil;
+        $this->lockedUntil = $until;
     }
 
-        public function verifyEmail(): void 
+
+   public function isLocked(): bool
+    {
+        return $this->lockedUntil !== null && $this->lockedUntil > new DateTimeImmutable('now');
+    }
+
+
+    public function verifyEmail(): void 
     {
         $this->emailVerified = true;
     }
@@ -162,6 +162,13 @@ Class User {
     public function markPasswordMustChange(): void 
     {
         $this->mustChangePassword = true;
+    }
+
+    public function changePassword(HashedPassword $newPassword): void
+    {
+        $this->password = $newPassword;
+        $this->passwordChangedAt = new DateTimeImmutable('now');
+        $this->mustChangePassword = false;
     }
 
     public static function register(Role $role, string $username, Email $email, HashedPassword $hashedPassword, string $firstName, string $lastName): self {
