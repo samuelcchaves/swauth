@@ -32,13 +32,12 @@ final class RegistrationService {
         }
 
         $defaultRole = $this->roleRepo->findByName('user');
-        $password = HashedPassword::fromPlainText($plainPassword);
 
         $user = User::register(
             role: $defaultRole,
             username: $username,
             email: $email,
-            hashedPassword: $password,
+            plainPassword: $plainPassword,
             firstName: $firstName,
             lastName: $lastName,
         );

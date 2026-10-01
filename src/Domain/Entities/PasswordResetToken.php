@@ -57,4 +57,23 @@ class PasswordResetToken
         $this->status = 'superseded';
         $this->resolvedAt = new DateTimeImmutable();
     }
+
+    public static function create(int $userId, int $validFor): array {
+        $pair = TokenHash::generate()['hash'];
+        
+        $token = new self(
+            id: 0,
+            userId: $userId,
+            tokenHash: $pair['hash'],
+            status: 'pending',
+            expiresAt: new DateTimeImmutable("+{validFor} minutes"),
+        );
+
+        return [
+            'raw' => $pair['raw'],
+            'entity' => $token,
+        ];
+
+    
+    }
 }

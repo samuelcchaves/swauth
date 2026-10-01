@@ -12,6 +12,7 @@ use SwAuth\Domain\Entities\User;
 use SwAuth\Domain\Repositories\RoleRepositoryInterface;
 use SwAuth\Domain\ValueObjects\Email;
 use SwAuth\Domain\ValueObjects\HashedPassword;
+use SwAuth\Domain\ValueObjects\TokenHash;
 
 class PdoUserRepository implements UserRepositoryInterface {
     
@@ -111,7 +112,6 @@ class PdoUserRepository implements UserRepositoryInterface {
             $user->getId(),
         ]);
     }
-
 
 
     private function mapRowToUser(array $row): User {

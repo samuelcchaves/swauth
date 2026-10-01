@@ -7,6 +7,8 @@ use SwAuth\Domain\ValueObjects\HashedPassword;
 
 
 use DateTimeImmutable;
+use SwAuth\Domain\ValueObjects\TokenHash;
+use SwAuth\Exceptions\InvalidPasswordMatchException;
 
 class User {
     private int $id;
@@ -164,14 +166,31 @@ class User {
         $this->mustChangePassword = true;
     }
 
-    public function changePassword(HashedPassword $newPassword): void
+    public function changePassword(string $newPassword, string $confirmPassword): void
     {
-        $this->password = $newPassword;
+        if(!$this->password->verify($confirmPassword)){
+            throw new InvalidPasswordMatchException;
+        }
+
+        $this->password = HashedPassword::fromPlainText($newPassword); 
         $this->passwordChangedAt = new DateTimeImmutable('now');
         $this->mustChangePassword = false;
+
     }
 
-    public static function register(Role $role, string $username, Email $email, HashedPassword $hashedPassword, string $firstName, string $lastName): self {
+    public function resetPassword(string $newPassword): void
+    {
+    
+        $this->password = HashedPassword::fromPlainText($newPassword); 
+        $this->passwordChangedAt = new DateTimeImmutable('now');
+        $this->mustChangePassword = false;
+
+    }
+
+    public static function register(Role $role, string $username, Email $email, string $plainPassword, string $firstName, string $lastName): self {
+        
+        $hashedPassword = HashedPassword::fromPlainText($plainPassword);
+
         return new self(
             id: 0, role: $role, isActive: true, username: $username, email: $email, firstName: $firstName, lastName: $lastName, emailVerified: false,
             password: $hashedPassword, mustChangePassword: false, failedLoginCount: 0, passwordChangedAt:null, lockedUntil: null, lastLoginAt: null
