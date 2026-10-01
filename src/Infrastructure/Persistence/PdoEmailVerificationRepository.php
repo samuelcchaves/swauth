@@ -1,6 +1,6 @@
 <?php 
 
-namespace Src\Infrastructure\Persistence;
+namespace SwAuth\Infrastructure\Persistence;
 
 
 use DateTimeImmutable;
@@ -52,7 +52,7 @@ class PdoEmailVerificationRepository implements EmailVerificationRepositoryInter
         return new EmailVerificationToken(
             id: $newId,
             userId: $emailVerificationToken->getUserId(),
-            tokenHash: TokenHash::fromStoredHash($emailVerificationToken->getTokenHash()),
+            tokenHash: $emailVerificationToken->getTokenHash(),
             status: $emailVerificationToken->getStatus(),
             expiresAt: $emailVerificationToken->getExpiresAt(),
             resolvedAt: $emailVerificationToken->getResolvedAt()
@@ -69,6 +69,7 @@ class PdoEmailVerificationRepository implements EmailVerificationRepositoryInter
             $emailVerificationToken->getId(),
         ]);
     }
+
     private function mapRowToEmailVerification(array $row): EmailVerificationToken {
 
         $expiresAt = new DateTimeImmutable($row['expires_at']);

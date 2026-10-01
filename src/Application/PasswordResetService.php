@@ -4,12 +4,9 @@ namespace SwAuth\Application;
 
 use SwAuth\Domain\Repositories\UserRepositoryInterface;
 use SwAuth\Domain\Repositories\PasswordResetRepositoryInterface;
-use SwAuth\Domain\Entities\User;
 use SwAuth\Domain\Entities\PasswordResetToken;
 use SwAuth\Domain\ValueObjects\Email;
 use SwAuth\Domain\ValueObjects\TokenHash;
-use SwAuth\Exceptions\InvalidCredentialsException;
-use SwAuth\Exceptions\ResetPasswordException;
 
 
 final class PasswordResetService {
@@ -38,21 +35,21 @@ final class PasswordResetService {
 
     }
 
-    public function resetPassword(string $newPassword, string $raw) {
+    public function resetPassword(string $newPassword, string $raw): void {
         
 
         $tokenHash = TokenHash::fromStoredHash(TokenHash::hashRawToken($raw));
 
         $passwordReset = $this->passwordResetRepo->findPendingByTokenHash($tokenHash);
         
-        if(!$passwordReset) return null;
+        if(!$passwordReset) return;
 
         $user = $this->userRepo->findById($passwordReset->getUserId());
 
-        if(!$user) return null;
+        if(!$user) return;
 
 
-        if(!$passwordReset->isUsable()) return null;
+        if(!$passwordReset->isUsable()) return;
 
         $user->resetPassword($newPassword);
 
