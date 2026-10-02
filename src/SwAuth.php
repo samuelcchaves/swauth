@@ -1,8 +1,10 @@
 <?php
+
 namespace SwAuth;
 
 use Dotenv\Dotenv;
-
+use PDO;
+use SwAuth\SwAuthContainer;
 
 final class SwAuth
 {
@@ -10,15 +12,19 @@ final class SwAuth
 
     public static function boot(string $rootPath): void
     {
-        if(self::$booted) {
+        if (self::$booted) {
             return;
         }
 
         $dotenv = Dotenv::createImmutable($rootPath);
-        $dotenv->load();
+        $dotenv->safeLoad();
 
         self::$booted = true;
+    }
 
+    public static function init(PDO $pdo): SwAuthContainer
+    {
+        return new SwAuthContainer($pdo);
     }
 
     public static function version(): string
