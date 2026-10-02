@@ -19,10 +19,11 @@ final class LoginService {
     private MfaMethodRepositoryInterface $mfaRepo;
     private MfaService $mfaService;
 
-    public function __construct(UserRepositoryInterface $userRepositoryInterface, AccountLockoutPolicy $lockoutPolicy, MfaMethodRepositoryInterface $mfaMethodRepositoryInterface) {
+    public function __construct(UserRepositoryInterface $userRepositoryInterface, AccountLockoutPolicy $lockoutPolicy, MfaMethodRepositoryInterface $mfaMethodRepositoryInterface, MfaService $mfaService) {
         $this->userRepo = $userRepositoryInterface; 
-        $this->lockoutPolicy = $lockoutPolicy;
+        $this->lockoutPolicy = $lockoutPolicy; 
         $this->mfaRepo = $mfaMethodRepositoryInterface;
+        $this->mfaService = $mfaService;
     }
 
     public function login(string $email, string $password): User {
