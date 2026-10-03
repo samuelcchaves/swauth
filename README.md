@@ -4,7 +4,6 @@ Módulo de autenticação e autorização, construído como pacote Composer inde
 
 ## Objetivos funcionais do projeto
 
-- RBAC hierárquico por nivel (admin, manager, user, viewer)
 - Autenticação com hashing Argon2id
 - MFA via TOTP (Time-based One Time Password), com códigos de backup
 - Gestão de sessões por hash de token
