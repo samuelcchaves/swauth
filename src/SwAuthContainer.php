@@ -2,6 +2,7 @@
 
 namespace SwAuth;
 
+
 use PDO;
 use RuntimeException;
 use SwAuth\Application\AccountLockoutPolicy;
@@ -12,13 +13,16 @@ use SwAuth\Application\MfaService;
 use SwAuth\Application\PasswordResetService;
 use SwAuth\Application\RegistrationService;
 use SwAuth\Application\SessionService;
+use SwAuth\Application\IPolicy;
 use SwAuth\Domain\Repositories\EmailVerificationRepositoryInterface;
+use SwAuth\Domain\Repositories\LoginAuditRepositoryInterface;
 use SwAuth\Domain\Repositories\MfaMethodRepositoryInterface;
 use SwAuth\Domain\Repositories\PasswordResetRepositoryInterface;
 use SwAuth\Domain\Repositories\RoleRepositoryInterface;
 use SwAuth\Domain\Repositories\SessionRepositoryInterface;
 use SwAuth\Domain\Repositories\UserRepositoryInterface;
 use SwAuth\Infrastructure\Persistence\PdoEmailVerificationRepository;
+use SwAuth\Infrastructure\Persistence\PdoLoginAuditRepository;
 use SwAuth\Infrastructure\Persistence\PdoMfaRepository;
 use SwAuth\Infrastructure\Persistence\PdoPasswordResetRepository;
 use SwAuth\Infrastructure\Persistence\PdoRoleRepository;
@@ -35,6 +39,8 @@ final class SwAuthContainer
     private PasswordResetRepositoryInterface $passwordResetRepo;
     private EmailVerificationRepositoryInterface $emailVerificationRepo;
 
+    private LoginAuditRepositoryInterface $loginAuditRepo;
+
     private LoginService $loginService;
     private MfaService $mfaService;
     private ChangePasswordService $changePasswordService;
@@ -44,6 +50,7 @@ final class SwAuthContainer
     private SessionService $sessionService;
 
     private AccountLockoutPolicy $accountLockoutPolicy;
+    private IPolicy $ipolicy;
 
     public function __construct(PDO $pdo)
     {
@@ -53,9 +60,11 @@ final class SwAuthContainer
         $this->userRepo = new PdoUserRepository($pdo, $this->roleRepo);
         $this->sessionRepo = new PdoSessionRepository($pdo);
         $this->mfaRepo = new PdoMfaRepository($pdo);
+        $this->loginAuditRepo = new PdoLoginAuditRepository($pdo);
         $this->passwordResetRepo = new PdoPasswordResetRepository($pdo);
         $this->emailVerificationRepo = new PdoEmailVerificationRepository($pdo);
         $this->accountLockoutPolicy = new AccountLockoutPolicy(maxAttempts: 3, lockDurationMinutes: 15);
+        $this->ipolicy = new IPolicy(20, 15);
 
         // 2. Configuração lida do ambiente (já carregado por SwAuth::boot())
         $issuer = $_ENV['MFA_ISSUER'] ?? getenv('MFA_ISSUER') ?: 'SwAuth';
@@ -78,6 +87,8 @@ final class SwAuthContainer
             lockoutPolicy: $accountLockoutPolicy,
             mfaMethodRepositoryInterface: $this->mfaRepo,
             mfaService: $this->mfaService,
+            loginAuditRepositoryInterface: $this->loginAuditRepo,
+            ipolicy: $this->ipolicy
         );
 
         $this->changePasswordService = new ChangePasswordService(
