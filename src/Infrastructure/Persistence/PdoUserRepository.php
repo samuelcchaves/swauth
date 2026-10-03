@@ -7,21 +7,16 @@ use Override;
 use PDO;
 
 use SwAuth\Domain\Repositories\UserRepositoryInterface;
-USE SwAuth\Domain\Entities\Role;
 use SwAuth\Domain\Entities\User;
-use SwAuth\Domain\Repositories\RoleRepositoryInterface;
 use SwAuth\Domain\ValueObjects\Email;
 use SwAuth\Domain\ValueObjects\HashedPassword;
-use SwAuth\Domain\ValueObjects\TokenHash;
 
 class PdoUserRepository implements UserRepositoryInterface {
     
     private PDO $pdo;
-    private RoleRepositoryInterface $roleRepository;
-    public function __construct(PDO $pdo, RoleRepositoryInterface $roleRepository)
+    public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
-        $this->roleRepository = $roleRepository;
     }
 
     public function findById(int $id): ?User
@@ -70,11 +65,10 @@ class PdoUserRepository implements UserRepositoryInterface {
     }
 
     public function insert(User $user): User {
-        $stmt = $this->pdo->prepare("INSERT INTO users (role_id, is_active, username, email, first_name, last_name, email_verified, password_hash, must_change_password, failed_login_count)
+        $stmt = $this->pdo->prepare("INSERT INTO users (is_active, username, email, first_name, last_name, email_verified, password_hash, must_change_password, failed_login_count)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         $stmt->execute([
-            $user->getRole()->getId(),
             (int) $user->isActive(),
             $user->getUsername(),
             (string) $user->getEmail(),
@@ -83,7 +77,7 @@ class PdoUserRepository implements UserRepositoryInterface {
             (int) $user->isEmailVerified(),
             (string) $user->getPassword(),
             (int) $user->mustChangePassword(),
-            $user->getFailedLoginCount(),
+            $user->getFailedAttemptCount()
         ]);
 
         $newId = (int) $this->pdo->lastInsertId();
@@ -93,11 +87,10 @@ class PdoUserRepository implements UserRepositoryInterface {
 
     public function update(User $user): void {
         $stmt = $this->pdo->prepare(
-            "UPDATE users SET role_id = ?, is_active = ?,username = ?, email = ?, first_name = ?, last_name = ?, email_verified = ?, password_hash = ?, must_change_password = ?, failed_login_count = ?, locked_until = ?, last_login_at = ? WHERE id = ?"
+            "UPDATE users SET is_active = ?,username = ?, email = ?, first_name = ?, last_name = ?, email_verified = ?, password_hash = ?, must_change_password = ?, failed_login_count = ?, locked_until = ?, last_login_at = ? WHERE id = ?"
         );
 
         $stmt->execute([
-            $user->getRole()->getId(),
             (int) $user->isActive(),
             $user->getUsername(),
             (string) $user->getEmail(),
@@ -106,17 +99,16 @@ class PdoUserRepository implements UserRepositoryInterface {
             (int) $user->isEmailVerified(),
             (string) $user->getPassword(),
             (int) $user->mustChangePassword(),    
-            $user->getFailedLoginCount(),
+            $user->getFailedAttemptCount(),
             $user->getLockedUntil()?->format('Y-m-d H:i:s'),
             $user->getLastLoginAt()?->format('Y-m-d H:i:s'),
-            $user->getId(),
+            $user->getId()
         ]);
     }
 
 
     private function mapRowToUser(array $row): User {
 
-        $role = $this->roleRepository->findById((int) $row['role_id']);
 
         $passwordChangedAt = $row['password_changed_at'] !== null ? new DateTimeImmutable($row['password_changed_at']) : null;
         $lockedUntil = $row['locked_until'] !== null ? new DateTimeImmutable($row['locked_until']) : null;
@@ -124,7 +116,6 @@ class PdoUserRepository implements UserRepositoryInterface {
 
         return new User(
             id: (int) $row['id'],
-            role: $role,
             isActive: (bool) $row['is_active'],
             username: $row['username'],
             email: new Email($row['email']),

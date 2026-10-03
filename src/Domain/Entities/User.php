@@ -13,7 +13,6 @@ use SwAuth\Exceptions\InvalidPasswordMatchException;
 
 class User implements LockableInterface{
     private int $id;
-    private Role $role;
     private bool $isActive;
     private string $username;
     private Email $email;
@@ -34,7 +33,6 @@ class User implements LockableInterface{
     // Constructor method
     public function __construct(
         int $id,
-        Role $role,
         bool $isActive,
         string $username,
         Email $email,
@@ -49,7 +47,6 @@ class User implements LockableInterface{
         ?DateTimeImmutable $lastLoginAt = null
     ) {
         $this->id = $id;
-        $this->role = $role;
         $this->isActive = $isActive;
         $this->username = $username;
         $this->email = $email;
@@ -67,11 +64,6 @@ class User implements LockableInterface{
     public function getId(): int
     {
         return $this->id;
-    }
-
-    public function getRole(): Role
-    {
-        return $this->role;
     }
 
     public function isActive(): bool
@@ -190,12 +182,12 @@ class User implements LockableInterface{
 
     }
 
-    public static function register(Role $role, string $username, Email $email, string $plainPassword, string $firstName, string $lastName): self {
+    public static function register(string $username, Email $email, string $plainPassword, string $firstName, string $lastName): self {
         
         $hashedPassword = HashedPassword::fromPlainText($plainPassword);
 
         return new self(
-            id: 0, role: $role, isActive: true, username: $username, email: $email, firstName: $firstName, lastName: $lastName, emailVerified: false,
+            id: 0, isActive: true, username: $username, email: $email, firstName: $firstName, lastName: $lastName, emailVerified: false,
             password: $hashedPassword, mustChangePassword: false, failedLoginCount: 0, passwordChangedAt:null, lockedUntil: null, lastLoginAt: null
         );
     }

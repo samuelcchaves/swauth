@@ -14,25 +14,24 @@ use SwAuth\Application\PasswordResetService;
 use SwAuth\Application\RegistrationService;
 use SwAuth\Application\SessionService;
 use SwAuth\Application\IPolicy;
+
 use SwAuth\Domain\Repositories\EmailVerificationRepositoryInterface;
 use SwAuth\Domain\Repositories\LoginAuditRepositoryInterface;
 use SwAuth\Domain\Repositories\MfaMethodRepositoryInterface;
 use SwAuth\Domain\Repositories\PasswordResetRepositoryInterface;
-use SwAuth\Domain\Repositories\RoleRepositoryInterface;
 use SwAuth\Domain\Repositories\SessionRepositoryInterface;
 use SwAuth\Domain\Repositories\UserRepositoryInterface;
+
 use SwAuth\Infrastructure\Persistence\PdoEmailVerificationRepository;
 use SwAuth\Infrastructure\Persistence\PdoLoginAuditRepository;
 use SwAuth\Infrastructure\Persistence\PdoMfaRepository;
 use SwAuth\Infrastructure\Persistence\PdoPasswordResetRepository;
-use SwAuth\Infrastructure\Persistence\PdoRoleRepository;
 use SwAuth\Infrastructure\Persistence\PdoSessionRepository;
 use SwAuth\Infrastructure\Persistence\PdoUserRepository;
 use SwAuth\Shared\SecretEncryptor;
 
 final class SwAuthContainer
 {
-    private RoleRepositoryInterface $roleRepo;
     private UserRepositoryInterface $userRepo;
     private SessionRepositoryInterface $sessionRepo;
     private MfaMethodRepositoryInterface $mfaRepo;
@@ -54,10 +53,8 @@ final class SwAuthContainer
 
     public function __construct(PDO $pdo)
     {
-        // 1. Repositórios — a única camada que conhece o PDO.
-        // PdoUserRepository depende de RoleRepositoryInterface, por isso o Role tem de nascer primeiro.
-        $this->roleRepo = new PdoRoleRepository($pdo);
-        $this->userRepo = new PdoUserRepository($pdo, $this->roleRepo);
+  
+        $this->userRepo = new PdoUserRepository($pdo);
         $this->sessionRepo = new PdoSessionRepository($pdo);
         $this->mfaRepo = new PdoMfaRepository($pdo);
         $this->loginAuditRepo = new PdoLoginAuditRepository($pdo);
@@ -106,8 +103,7 @@ final class SwAuthContainer
         );
 
         $this->registrationService = new RegistrationService(
-            userRepositoryInterface: $this->userRepo,
-            roleRepositoryInterface: $this->roleRepo,
+            userRepositoryInterface: $this->userRepo
         );
 
         $this->sessionService = new SessionService(

@@ -2,7 +2,6 @@
 
 namespace SwAuth\Application;
 
-use SwAuth\Domain\Repositories\RoleRepositoryInterface;
 use SwAuth\Domain\Repositories\UserRepositoryInterface;
 use SwAuth\Domain\Entities\User;
 use SwAuth\Domain\ValueObjects\Email;
@@ -13,11 +12,9 @@ use SwAuth\Exceptions\EmailAlreadyExistsException;
 final class RegistrationService {
 
     private UserRepositoryInterface $userRepo;
-    private RoleRepositoryInterface $roleRepo;
 
-    public function __construct(UserRepositoryInterface $userRepositoryInterface, RoleRepositoryInterface $roleRepositoryInterface) {
+    public function __construct(UserRepositoryInterface $userRepositoryInterface) {
         $this->userRepo = $userRepositoryInterface;
-        $this->roleRepo = $roleRepositoryInterface;
     }
 
     public function register(string $username, string $email, string $plainPassword, string $firstName, string $lastName): User {
@@ -31,10 +28,7 @@ final class RegistrationService {
             throw new UsernameAlreadyExistsException("O username {$username} já está a ser utilizado.");
         }
 
-        $defaultRole = $this->roleRepo->findByName('user');
-
         $user = User::register(
-            role: $defaultRole,
             username: $username,
             email: $email,
             plainPassword: $plainPassword,
