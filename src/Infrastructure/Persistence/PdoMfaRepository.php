@@ -116,10 +116,6 @@ class PdoMfaRepository implements MfaMethodRepositoryInterface {
         return (int) $row['Total'];
     }
 
-
-
-
-
     private function mapRowToMfaMethods(array $row): MfaMethod {
         
         $lastUsedAt = $row['last_used_at'] !== null ? new DateTimeImmutable($row['last_used_at']) : null;
@@ -131,6 +127,8 @@ class PdoMfaRepository implements MfaMethodRepositoryInterface {
             secretEncrypted: $row['secret_encrypted'],
             isActive: (bool) $row['is_active'],
             lastUsedAt: $lastUsedAt,
+            failedMfaCount: $row['failed_mfa_count'],
+            lockedUntil: $row['locked_until']
         );
     }
 

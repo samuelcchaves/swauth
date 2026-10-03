@@ -43,6 +43,8 @@ final class SwAuthContainer
     private RegistrationService $registrationService;
     private SessionService $sessionService;
 
+    private AccountLockoutPolicy $accountLockoutPolicy;
+
     public function __construct(PDO $pdo)
     {
         // 1. Repositórios — a única camada que conhece o PDO.
@@ -53,6 +55,7 @@ final class SwAuthContainer
         $this->mfaRepo = new PdoMfaRepository($pdo);
         $this->passwordResetRepo = new PdoPasswordResetRepository($pdo);
         $this->emailVerificationRepo = new PdoEmailVerificationRepository($pdo);
+        $this->accountLockoutPolicy = new AccountLockoutPolicy(maxAttempts: 3, lockDurationMinutes: 15);
 
         // 2. Configuração lida do ambiente (já carregado por SwAuth::boot())
         $issuer = $_ENV['MFA_ISSUER'] ?? getenv('MFA_ISSUER') ?: 'SwAuth';
@@ -66,13 +69,13 @@ final class SwAuthContainer
         $encryptor = new SecretEncryptor($encryptionKey);
 
         // 3. Services — pela ordem das dependências.
-        $this->mfaService = new MfaService($this->mfaRepo, $encryptor, $issuer);
+        $this->mfaService = new MfaService($this->mfaRepo, $encryptor, $issuer, $this->accountLockoutPolicy);
 
-        $lockoutPolicy = new AccountLockoutPolicy();
+        $accountLockoutPolicy = new AccountLockoutPolicy();
 
         $this->loginService = new LoginService(
             userRepositoryInterface: $this->userRepo,
-            lockoutPolicy: $lockoutPolicy,
+            lockoutPolicy: $accountLockoutPolicy,
             mfaMethodRepositoryInterface: $this->mfaRepo,
             mfaService: $this->mfaService,
         );

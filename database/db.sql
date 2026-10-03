@@ -65,6 +65,8 @@ CREATE TABLE mfa_methods (
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_used_at TIMESTAMP NULL,
+    failed_mfa_count INT NULL
+    locked_until TIMESTAMP NULL
  
     CONSTRAINT FK_MFA_USER
         FOREIGN KEY (user_id) REFERENCES users(id)

@@ -2,11 +2,9 @@
 
 namespace SwAuth\Domain\Entities;
 
-use DateTime;
 use DateTimeImmutable;
-use Respect\Validation\Rules\Date;
 
-class MfaMethod
+class MfaMethod implements LockableInterface
 {
 
     private int $id;
@@ -15,9 +13,15 @@ class MfaMethod
     private string $type;
     private string $secretEncrypted;
     private bool $isActive;
+    private int $failedMfaCount;
 
     private ?DateTimeImmutable $lastUsedAt;
-    public function __construct(int $id, int $userId, string $type, string $secretEncrypted, bool $isActive, ?DateTimeImmutable $lastUsedAt = null)
+
+
+    private ?DateTimeImmutable $lockedUntil;
+
+
+    public function __construct(int $id, int $userId, string $type, string $secretEncrypted, bool $isActive,int $failedMfaCount, ?DateTimeImmutable $lastUsedAt = null, ?DateTimeImmutable $lockedUntil = null)
     {
         $this->id = $id;
         $this->userId = $userId;
@@ -25,6 +29,8 @@ class MfaMethod
         $this->secretEncrypted = $secretEncrypted;
         $this->isActive = $isActive;
         $this->lastUsedAt = $lastUsedAt;
+        $this->failedMfaCount = $failedMfaCount;
+        $this->lockedUntil = $lockedUntil;
     }
 
     public function getId(): int {
@@ -60,6 +66,39 @@ class MfaMethod
     public function recordUsage(): void
     {
         $this->lastUsedAt = new DateTimeImmutable();
+    }
+
+    public function recordFailedMfa(): void 
+    {
+        $this->failedMfaCount++;
+    }
+    public function getFailedAttemptCount(): int
+    {
+        return $this->failedMfaCount;
+    }
+
+
+    public function getLockedUntil(): ?DateTimeImmutable
+    {
+        return $this->lockedUntil;
+    }
+
+    public function recordSuccessfulMfa(): void
+    {
+        $this->failedMfaCount = 0;
+        $this->lockedUntil = null;
+        $this->lastUsedAt = new DateTimeImmutable('now');
+    }
+
+    public function lock(DateTimeImmutable $until): void
+    {
+        $this->lockedUntil = $until;
+    }
+
+
+   public function isLocked(): bool
+    {
+        return $this->lockedUntil !== null && $this->lockedUntil > new DateTimeImmutable('now');
     }
 
 }

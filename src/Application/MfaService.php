@@ -17,10 +17,13 @@ final class MfaService {
     private SecretEncryptor $encryptor;
     private string $issuer;
 
-    public function __construct(MfaMethodRepositoryInterface $mfaRepo, SecretEncryptor $encryptor, string $issuer){
+    private AccountLockoutPolicy $lockOutPolicy;
+
+    public function __construct(MfaMethodRepositoryInterface $mfaRepo, SecretEncryptor $encryptor, string $issuer, AccountLockoutPolicy $lockoutPolicy){
         $this->mfaRepo = $mfaRepo;
         $this->encryptor = $encryptor;
         $this->issuer = $issuer;
+        $this->lockOutPolicy = $lockoutPolicy;
     }
 
     public function setup(int $userId, Email $email): array {
@@ -36,7 +39,7 @@ final class MfaService {
         $totp->setIssuer($this->issuer);
         $secretPlain = $totp->getSecret();
 
-        $mfaMethod = new MfaMethod(id: 0, userId: $userId, type: 'totp', secretEncrypted: $this->encryptor->encrypt($secretPlain),isActive: false, lastUsedAt: null);
+        $mfaMethod = new MfaMethod(id: 0, userId: $userId, type: 'totp', secretEncrypted: $this->encryptor->encrypt($secretPlain),isActive: false, lastUsedAt: null, failedMfaCount: 0, lockedUntil: null);
 
         $created = $this->mfaRepo->insert($mfaMethod);
 
@@ -63,28 +66,36 @@ final class MfaService {
     }
 
     public function verify(int $userId, string $code): bool {
+
         $mfaMethod = $this->mfaRepo->findActiveByUserId($userId);
 
-        if($mfaMethod === null) {
-            return false;
-        }   
+        if($mfaMethod === null || $mfaMethod->isLocked()) return false;
+        
+
 
         $secretPlain = $this->encryptor->decrypt($mfaMethod->getSecretEncrypted());
         $totp = TOTP::createFromSecret($secretPlain);
 
-        if($totp->verify($code)) {
-            $mfaMethod->recordUsage();
+        $isValidTotp = $totp->verify($code);
+        $isValidBackupCode = !$isValidTotp && $this->mfaRepo->consumeBackupCode($userId, BackupCode::fromRaw($code));
+
+        if($isValidTotp || $isValidBackupCode ) {
+            $mfaMethod->recordSuccessfulMfa();
             $this->mfaRepo->update($mfaMethod);
             return true;
         }
 
-        if($this->mfaRepo->consumeBackupCode($userId, BackupCode::fromRaw($code))) {
-            $mfaMethod->recordUsage();
-            $this->mfaRepo->update($mfaMethod);
-            return true;
+        $mfaMethod->recordFailedMfa();
+        
+        if($this->lockOutPolicy->shouldLock($mfaMethod)){
+            $mfaMethod->lock($this->lockOutPolicy->calculateLockUntil());
         }
+
+        $this->mfaRepo->update($mfaMethod);
 
         return false;
+
+
     }
 
     public function generateBackupCodes(int $userId, int $count = 10): array {

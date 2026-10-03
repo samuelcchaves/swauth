@@ -13,7 +13,7 @@ final class BackupCode {
 
     
     public static function generate(): array {
-        $raw = strtoupper(substr(bin2hex(random_bytes(4)), 0, 8));
+        $raw = strtoupper(substr(bin2hex(random_bytes(10)), 0, 8));
         return [
             'raw' => $raw,
             'hash' => new self(hash('sha256', $raw)),

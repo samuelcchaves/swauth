@@ -7,10 +7,11 @@ use SwAuth\Domain\ValueObjects\HashedPassword;
 
 
 use DateTimeImmutable;
+use Override;
 use SwAuth\Domain\ValueObjects\TokenHash;
 use SwAuth\Exceptions\InvalidPasswordMatchException;
 
-class User {
+class User implements LockableInterface{
     private int $id;
     private Role $role;
     private bool $isActive;
@@ -118,9 +119,11 @@ class User {
         return $this->passwordChangedAt;
     }
 
-    public function getFailedLoginCount(): int
+    #[Override]
+    public function getFailedAttemptCount(): int
     {
         return $this->failedLoginCount;
+
     }
 
     public function getLockedUntil(): ?DateTimeImmutable
